@@ -100,16 +100,22 @@ namespace Blik
         private void connectK8055()
         {
             int CardAddr = 0;
-            int h = OpenDevice(CardAddr);
-            if(h==-1)
+            try
             {
-                Console.WriteLine("USB interface card not found!");
-                interfaceCardConnected = false;
-            }
-            else
+                int h = OpenDevice(CardAddr);
+                if (h == -1)
+                {
+                    Console.WriteLine("USB interface card not found!");
+                    interfaceCardConnected = false;
+                }
+                else
+                {
+                    interfaceCardConnected = true;
+                    ClearAllDigital();
+                }
+            } catch (DllNotFoundException)
             {
-                interfaceCardConnected = true;
-                ClearAllDigital();
+                Console.WriteLine("USB interface card DLL not found!");
             }
         }
 
@@ -692,7 +698,13 @@ namespace Blik
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             saveObjects();
-            CloseDevice();      // Close USB interface card
+            try
+            {
+                CloseDevice();      // Close USB interface card
+            } catch (DllNotFoundException)
+            {
+                Console.WriteLine("USB capture DLL not found");
+            }
         }
 
         private void checkBoxMakeAnalysisImage_CheckedChanged(object sender, EventArgs e)
